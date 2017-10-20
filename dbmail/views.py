@@ -37,10 +37,10 @@ def send_by_dbmail(request):
         api_key = kwargs.get('api_key')
         if api_key:
             del kwargs['api_key']
-            if not cache.get(api_key):
-                get_object_or_404(
-                    ApiKey, api_key=api_key, is_active=True)
-                cache.set(api_key, 1, timeout=defaults.CACHE_TTL)
+            api_key = get_object_or_404(ApiKey, api_key=api_key, is_active=True)
+
+            if not api_key.is_allowed_ip(request):
+                raise Http404
 
             args = []
             if request.POST.get('data'):

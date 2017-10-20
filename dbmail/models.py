@@ -24,7 +24,7 @@ from dbmail.defaults import (
 
 from dbmail import initial_signals, import_by_string
 from dbmail import python_2_unicode_compatible
-from dbmail.utils import premailer_transform
+from dbmail.utils import premailer_transform, get_ip
 
 
 HTMLField = import_by_string(MODEL_HTMLFIELD)
@@ -619,6 +619,7 @@ class ApiKey(models.Model):
     is_active = models.BooleanField(_('Is active'), default=True)
     created = models.DateTimeField(_('Created'), auto_now_add=True)
     updated = models.DateTimeField(_('Updated'), auto_now=True)
+    allowed_origins = models.TextField(_('Allowed IP addresses (one per line)'), default='', blank=True)
 
     def _clean_cache(self):
         cache.delete(self.api_key)
@@ -627,6 +628,16 @@ class ApiKey(models.Model):
     def clean_cache(cls):
         for api in cls.objects.all():
             api._clean_cache()
+
+    def is_allowed_ip(self, request):
+        """
+        Returns True if client ip is in allowed_origins or allowed_origins field is empty
+        """
+        if not self.allowed_origins:
+            return True
+
+        client_ip = get_ip(request)
+        return client_ip in self.allowed_origins.split()
 
     def save(self, *args, **kwargs):
         super(ApiKey, self).save(*args, **kwargs)
