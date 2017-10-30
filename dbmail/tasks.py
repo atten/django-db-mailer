@@ -2,6 +2,8 @@
 
 from django.core import signing
 from celery import task
+from celery.schedules import crontab
+from celery.task import periodic_task
 
 from dbmail.defaults import SEND_RETRY_DELAY, SEND_RETRY, SEND_MAX_TIME, DEBUG
 from dbmail.utils import get_ip
@@ -88,3 +90,11 @@ def mail_track(http_meta, encrypted):
             retry=True, max_retries=SEND_RETRY,
             countdown=SEND_RETRY_DELAY, exc=exc,
         )
+
+
+@periodic_task(run_every=crontab(minute=0, hour=0))
+def cleanup_email_logs():
+    from dbmail.defaults import LOGS_EXPIRE_DAYS
+    from dbmail.models import MailLog
+
+    MailLog.cleanup(days=LOGS_EXPIRE_DAYS)

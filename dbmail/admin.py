@@ -204,12 +204,12 @@ class MailLogEmailInline(admin.TabularInline):
 class MailLogAdmin(admin.ModelAdmin):
     list_display = (
         'template', 'created', 'is_sent', 'num_of_retries',
-        'backend', 'user', 'id',)
+        'backend', 'context_fields', 'user', 'id',)
     list_filter = (
         'is_sent', 'backend', 'created', 'error_exception', 'template',)
     date_hierarchy = 'created'
     inlines = [MailLogEmailInline]
-    search_fields = ('maillogemail__email', 'user__username', 'user__email',)
+    search_fields = ('maillogemail__email', 'user__username', 'user__email', 'context_fields')
 
     def __init__(self, model, admin_site):
         super(MailLogAdmin, self).__init__(model, admin_site)

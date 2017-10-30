@@ -14,17 +14,19 @@ from django.utils import timezone
 from django.conf import settings
 from django.db import models
 from django import VERSION
+from django.contrib.postgres.fields import JSONField
 
 from dbmail.defaults import (
     PRIORITY_STEPS, UPLOAD_TO, DEFAULT_CATEGORY, AUTH_USER_MODEL,
     DEFAULT_FROM_EMAIL, DEFAULT_PRIORITY, CACHE_TTL,
     BACKEND, _BACKEND, BACKENDS_MODEL_CHOICES, MODEL_HTMLFIELD,
-    MODEL_SUBSCRIPTION_DATA_FIELD, SORTED_BACKEND_CHOICES, TRACK_USE_GEOIP2
+    MODEL_SUBSCRIPTION_DATA_FIELD, SORTED_BACKEND_CHOICES, TRACK_USE_GEOIP2,
+    INCLUDE_LOG_CONTEXT_FIELDS
 )
 
 from dbmail import initial_signals, import_by_string
 from dbmail import python_2_unicode_compatible
-from dbmail.utils import premailer_transform, get_ip
+from dbmail.utils import premailer_transform, get_ip, dotval
 
 
 HTMLField = import_by_string(MODEL_HTMLFIELD)
@@ -372,6 +374,7 @@ class MailLog(models.Model):
     provider = models.CharField(
         _('Provider'), max_length=250, editable=False, db_index=True,
         default=None, null=True, blank=True)
+    context_fields = JSONField(_('Context'), blank=True, null=True)
 
     @staticmethod
     def store_email_log(log, email_list, mail_type):
@@ -384,15 +387,19 @@ class MailLog(models.Model):
     @classmethod
     def store(cls, to, cc, bcc, is_sent, template,
               user, num, msg='', ex=None, log_id=None,
-              backend=None, provider=None):
+              backend=None, provider=None, context=None):
         if ex is not None:
             ex = MailLogException.get_or_create(ex)
+
+        context_fields = None
+        if context and INCLUDE_LOG_CONTEXT_FIELDS:
+            context_fields = {k: dotval(context, k) for k in INCLUDE_LOG_CONTEXT_FIELDS}
 
         log = cls.objects.create(
             template=template, is_sent=is_sent, user=user,
             log_id=log_id, num_of_retries=num, error_message=msg,
             error_exception=ex, backend=_BACKEND.get(backend, backend),
-            provider=provider
+            provider=provider, context_fields=context_fields
         )
         cls.store_email_log(log, to, 'to')
         cls.store_email_log(log, cc, 'cc')
