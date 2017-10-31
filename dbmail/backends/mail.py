@@ -257,7 +257,7 @@ class Sender(object):
                     self._recipient_list, self._cc, self._bcc,
                     is_sent, self._template, self._user,
                     self._num, self._err_msg, self._err_exc,
-                    self._log_id, self._backend, self._provider, self._context
+                    self._log_id, self._backend, self._provider, self._context, self._from_email
                 )
 
     def _try_to_send(self):

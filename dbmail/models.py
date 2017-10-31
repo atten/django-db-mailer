@@ -375,6 +375,7 @@ class MailLog(models.Model):
         _('Provider'), max_length=250, editable=False, db_index=True,
         default=None, null=True, blank=True)
     context_fields = JSONField(_('Context'), blank=True, null=True)
+    from_email = models.CharField(_('From email'), max_length=350, blank=True, null=True)
 
     @staticmethod
     def store_email_log(log, email_list, mail_type):
@@ -387,7 +388,7 @@ class MailLog(models.Model):
     @classmethod
     def store(cls, to, cc, bcc, is_sent, template,
               user, num, msg='', ex=None, log_id=None,
-              backend=None, provider=None, context=None):
+              backend=None, provider=None, context=None, from_email=None):
         if ex is not None:
             ex = MailLogException.get_or_create(ex)
 
@@ -399,7 +400,7 @@ class MailLog(models.Model):
             template=template, is_sent=is_sent, user=user,
             log_id=log_id, num_of_retries=num, error_message=msg,
             error_exception=ex, backend=_BACKEND.get(backend, backend),
-            provider=provider, context_fields=context_fields
+            provider=provider, context_fields=context_fields, from_email=from_email
         )
         cls.store_email_log(log, to, 'to')
         cls.store_email_log(log, cc, 'cc')

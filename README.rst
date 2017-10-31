@@ -599,4 +599,4 @@ Changes by atten
 ----------------
 - added periodic task ``cleanup_email_logs``
 - added IP filter for api keys
-- added context_fields for ``EmailLog``
+- added context_fields and email_from for ``MailLog``
