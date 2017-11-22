@@ -19,7 +19,7 @@ from django.core import signing
 from dbmail.models import MailTemplate, MailLog, MailGroup, MailLogException
 from dbmail.defaults import SHOW_CONTEXT, ENABLE_LOGGING, ADD_HEADER
 from dbmail.exceptions import StopSendingException
-from dbmail.utils import clean_html
+from dbmail.utils import clean_html, premailer_transform
 from dbmail import import_module
 from dbmail import get_version
 from dbmail import defaults
@@ -137,8 +137,10 @@ class Sender(object):
 
     def _get_message(self):
         if self._template.base:
-            return self._get_message_with_base()
-        return self._get_standard_message()
+            msg = self._get_message_with_base()
+        else:
+            msg =  self._get_standard_message()
+        return premailer_transform(msg)
 
     def _get_msg_with_track(self):
         message = self._message

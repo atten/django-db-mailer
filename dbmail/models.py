@@ -267,7 +267,6 @@ class MailTemplate(models.Model):
         return obj
 
     def save(self, *args, **kwargs):
-        self._premailer_transform()
         self._clean_non_html()
         self.slug = re.sub(r'[^0-9a-zA-Z._-]', '', self.slug)
         super(MailTemplate, self).save(*args, **kwargs)

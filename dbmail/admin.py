@@ -19,6 +19,8 @@ from dbmail import app_installed
 from dbmail import get_model
 from dbmail import defaults
 
+from .admin_utils import uni_fk_tr_10
+
 ModelAdmin = admin.ModelAdmin
 
 if app_installed('reversion'):
@@ -203,8 +205,8 @@ class MailLogEmailInline(admin.TabularInline):
 
 class MailLogAdmin(admin.ModelAdmin):
     list_display = (
-        'template', 'created', 'is_sent', 'num_of_retries',
-        'backend', 'context_fields', 'user', 'id',)
+        'id', uni_fk_tr_10('template'), 'created', 'is_sent', 'num_of_retries',
+        'backend', 'context_fields', 'user',)
     list_filter = (
         'is_sent', 'backend', 'created', 'error_exception', 'template',)
     date_hierarchy = 'created'
