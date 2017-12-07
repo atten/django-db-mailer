@@ -27,6 +27,7 @@ from dbmail.defaults import (
 from dbmail import initial_signals, import_by_string
 from dbmail import python_2_unicode_compatible
 from dbmail.utils import premailer_transform, get_ip, dotval
+from dbmail.querysets import MailCredentialQuerySet
 
 
 HTMLField = import_by_string(MODEL_HTMLFIELD)
@@ -84,6 +85,18 @@ class MailFromEmailCredential(models.Model):
     created = models.DateTimeField(_('Created'), auto_now_add=True)
     updated = models.DateTimeField(_('Updated'), auto_now=True)
 
+    objects = MailCredentialQuerySet.as_manager()
+
+    def as_dict(self):
+        return dict(
+            host=self.host,
+            port=self.port,
+            username=str(self.username),
+            password=str(self.password),
+            use_tls=self.use_tls,
+            fail_silently=self.fail_silently
+        )
+
     def _clean_cache(self):
         for obj in MailFromEmail.objects.filter(credential=self):
             obj._clean_template_cache()
@@ -125,14 +138,7 @@ class MailFromEmail(models.Model):
 
     def get_auth(self):
         if self.credential:
-            return dict(
-                host=self.credential.host,
-                port=self.credential.port,
-                username=str(self.credential.username),
-                password=str(self.credential.password),
-                use_tls=self.credential.use_tls,
-                fail_silently=self.credential.fail_silently
-            )
+            return self.credential.as_dict()
 
     def delete(self, using=None):
         self._clean_template_cache()

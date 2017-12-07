@@ -16,7 +16,7 @@ from django.utils import translation
 from django.conf import settings
 from django.core import signing
 
-from dbmail.models import MailTemplate, MailLog, MailGroup, MailLogException
+from dbmail.models import MailTemplate, MailLog, MailGroup, MailLogException, MailFromEmailCredential
 from dbmail.defaults import SHOW_CONTEXT, ENABLE_LOGGING, ADD_HEADER
 from dbmail.exceptions import StopSendingException
 from dbmail.utils import clean_html, premailer_transform
@@ -73,6 +73,10 @@ class Sender(object):
         self._kwargs['headers'] = headers
 
     def _get_connection(self):
+        credentials = MailFromEmailCredential.objects.get_by_from_email(self._from_email)
+        if credentials:
+            return get_connection(**credentials.as_dict())
+
         if self._template.auth_credentials:
             return self._kwargs.pop('connection', None) or get_connection(
                 **self._template.auth_credentials)
