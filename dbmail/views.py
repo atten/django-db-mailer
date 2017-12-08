@@ -34,7 +34,7 @@ def send_by_dbmail(request):
                 kwargs[f] = request.POST.get(f)
 
         if request.FILES:
-            kwargs['files'] = request.FILES.values()
+            kwargs['files'] = list(request.FILES.values())
 
         backend = defaults.BACKEND.get(kwargs.pop('backend', 'mail'))
         api_key = kwargs.get('api_key')
