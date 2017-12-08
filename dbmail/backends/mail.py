@@ -165,8 +165,10 @@ class Sender(object):
         for file_object in self._template.files_list:
             mail.attach_file(file_object.filename.path)
 
-        for filename in self._files:
-            mail.attach_file(filename)
+        for file_object in self._files.values():
+            mail.attachments.append(
+                (file_object.name, file_object.file.read(), file_object.content_type)
+            )
 
     def _send_html_message(self):
         msg = EmailMultiAlternatives(
