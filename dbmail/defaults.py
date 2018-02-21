@@ -93,6 +93,7 @@ TRACK_HTML = get_settings(
 
 BACKEND = get_settings('DB_MAILER_BACKEND', {
     'mail': 'dbmail.backends.mail',
+    'mail_raw': 'dbmail.backends.mail_raw',
     'tts': 'dbmail.backends.tts',
     'sms': 'dbmail.backends.sms',
     'push': 'dbmail.backends.push',
